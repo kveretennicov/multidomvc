@@ -5,11 +5,11 @@ module.exports = function (config) {
 		basePath: '../../',
 		frameworks: ['jasmine'],
 		files: [
-			'lib/angular.js',
-			'lib/angular-route.js',
-			'lib/angular-resource.js',
+			'public/lib/angular.js',
+			'public/lib/angular-route.js',
+			'public/lib/angular-resource.js',
 			'node_modules/angular-mocks/angular-mocks.js',
-			'js/**/*.js',
+			'public/js/**/*.js',
 			'test/unit/**/*.js'
 		],
 		autoWatch: true,
