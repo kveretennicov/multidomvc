@@ -15,13 +15,13 @@ angular.module('todomvc')
 		// hand off the localStorage adapter
 		return $http.get('/api')
 			.then(function () {
-				return $injector.get('api');
+				return $injector.get('apiBackedTodoStorage');
 			}, function () {
-				return $injector.get('localStorage');
+				return $injector.get('clientBackedTodoStorage');
 			});
 	})
 
-	.factory('api', function ($resource) {
+	.factory('apiBackedTodoStorage', function ($resource) {
 		'use strict';
 
 		var store = {
@@ -87,7 +87,7 @@ angular.module('todomvc')
 		return store;
 	})
 
-	.factory('localStorage', function ($q) {
+	.factory('clientBackedTodoStorage', function ($q) {
 		'use strict';
 
 		var STORAGE_ID = 'todos-angularjs';

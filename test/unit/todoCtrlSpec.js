@@ -8,17 +8,17 @@
 		// Load the module containing the app, only 'ng' is loaded by default.
 		beforeEach(module('todomvc'));
 
-		beforeEach(inject(function ($controller, $rootScope, localStorage) {
+		beforeEach(inject(function ($controller, $rootScope, clientBackedTodoStorage) {
 			scope = $rootScope.$new();
 
-			store = localStorage;
+			store = clientBackedTodoStorage;
 
-			localStorage.todos = [];
-			localStorage._getFromLocalStorage = function () {
+			clientBackedTodoStorage.todos = [];
+			clientBackedTodoStorage._getFromLocalStorage = function () {
 				return [];
 			};
-			localStorage._saveToLocalStorage = function (todos) {
-				localStorage.todos = todos;
+			clientBackedTodoStorage._saveToLocalStorage = function (todos) {
+				clientBackedTodoStorage.todos = todos;
 			};
 
 			ctrl = $controller('TodoCtrl', {
