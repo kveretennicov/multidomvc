@@ -44,45 +44,61 @@ input[type="checkbox"] {
 	display: none;
 }
 
-#todoapp {
+#todoapp-view-list-container,
+#todoapp-new-list-container {
+	margin-top: 30px
+}
+
+#todolists {
+	margin-bottom: 24px;
+}
+
+#todolists-dropdown {
+	width: 100%;
+	font-size: 24px;
+	padding: 8px;
+}
+
+#todolists-dropdown > option {
+	font-size: 16px;
+	padding: 4px;
+}
+
+#todoapp,
+#new-list-form {
 	background: #fff;
-	margin: 130px 0 40px 0;
+	margin: 0 0 40px 0;
 	position: relative;
 	box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2),
 	            0 25px 50px 0 rgba(0, 0, 0, 0.1);
 }
 
-#todoapp input::-webkit-input-placeholder {
+input::-webkit-input-placeholder {
 	font-style: italic;
 	font-weight: 300;
 	color: #e6e6e6;
 }
 
-#todoapp input::-moz-placeholder {
+input::-moz-placeholder {
 	font-style: italic;
 	font-weight: 300;
 	color: #e6e6e6;
 }
 
-#todoapp input::input-placeholder {
+input::input-placeholder {
 	font-style: italic;
 	font-weight: 300;
 	color: #e6e6e6;
 }
 
-#todoapp h1 {
-	position: absolute;
-	top: -155px;
+h1 {
 	width: 100%;
-	font-size: 100px;
+	font-size: 64px;
 	font-weight: 100;
-	text-align: center;
 	color: rgba(175, 47, 47, 0.15);
-	-webkit-text-rendering: optimizeLegibility;
-	-moz-text-rendering: optimizeLegibility;
-	text-rendering: optimizeLegibility;
 }
 
+#new-list,
 #new-todo,
 .edit {
 	position: relative;
@@ -104,11 +120,26 @@ input[type="checkbox"] {
 	font-smoothing: antialiased;
 }
 
+#new-list,
 #new-todo {
 	padding: 16px 16px 16px 60px;
 	border: none;
 	background: rgba(0, 0, 0, 0.003);
 	box-shadow: inset 0 -2px 1px rgba(0,0,0,0.03);
+}
+
+#new-list {
+	padding-left: 24px;
+}
+
+#new-list.invalid-name {
+	color: red;
+}
+
+#new-list-warning {
+	text-align: right;
+	font-size: larger;
+	margin-top: -1em;
 }
 
 #main {
@@ -287,11 +318,18 @@ label[for='toggle-all'] {
 	left: 0;
 }
 
-#filters li {
+#todolist-buttons {
+	list-style: none;
+	padding-left: 0;
+}
+
+#filters li,
+#todolist-buttons li {
 	display: inline;
 }
 
-#filters li a {
+#filters li a,
+#todolist-buttons li a {
 	color: inherit;
 	margin: 3px;
 	padding: 3px 7px;
@@ -301,8 +339,14 @@ label[for='toggle-all'] {
 }
 
 #filters li a.selected,
-#filters li a:hover {
+#filters li a:hover,
+#todolist-buttons li a {
 	border-color: rgba(175, 47, 47, 0.1);
+}
+
+#todolist-buttons li a:hover {
+	background: #fff;
+	cursor: pointer;
 }
 
 #filters li a.selected {

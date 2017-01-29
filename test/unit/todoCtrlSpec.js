@@ -11,19 +11,19 @@
 		beforeEach(inject(function ($controller, $rootScope, clientBackedTodoStorage) {
 			scope = $rootScope.$new();
 
-			store = clientBackedTodoStorage;
+			var mainStore = scope.store = clientBackedTodoStorage;
+			store = mainStore.lists['default'];
 
-			clientBackedTodoStorage.todos = [];
-			clientBackedTodoStorage._getFromLocalStorage = function () {
+			store.todos = [];
+			store._getFromLocalStorage = function () {
 				return [];
 			};
-			clientBackedTodoStorage._saveToLocalStorage = function (todos) {
-				clientBackedTodoStorage.todos = todos;
+			store._saveToLocalStorage = function (todos) {
+				store.todos = todos;
 			};
 
 			ctrl = $controller('TodoCtrl', {
-				$scope: scope,
-				store: store
+				$scope: scope
 			});
 		}));
 
@@ -52,7 +52,6 @@
 				it('should filter non-completed', inject(function ($controller) {
 					ctrl = $controller('TodoCtrl', {
 						$scope: scope,
-						store: store,
 						$routeParams: {
 							status: 'active'
 						}
@@ -69,8 +68,7 @@
 						$scope: scope,
 						$routeParams: {
 							status: 'completed'
-						},
-						store: store
+						}
 					});
 
 					scope.$emit('$routeChangeSuccess');
@@ -84,8 +82,7 @@
 
 			beforeEach(inject(function ($controller) {
 				ctrl = $controller('TodoCtrl', {
-					$scope: scope,
-					store: store
+					$scope: scope
 				});
 				scope.$digest();
 			}));
@@ -119,8 +116,7 @@
 
 			beforeEach(inject(function ($controller) {
 				ctrl = $controller('TodoCtrl', {
-					$scope: scope,
-					store: store
+					$scope: scope
 				});
 
 				store.insert({ title: 'Uncompleted Item 0', completed: false });

@@ -1,14 +1,21 @@
 /*global angular */
 
 /**
- * The main controller for the app. The controller:
- * - retrieves and persists the model via the todoStorage service
+ * The To Do list controller for the app. The controller:
+ * - retrieves and persists the model via the "store" service
  * - exposes the model to the template and provides event handlers
  */
 angular.module('todomvc')
-	.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, $filter, store) {
+	.controller('TodoCtrl', function TodoCtrl($scope, $routeParams, $filter, $location, $log, appPaths) {
 		'use strict';
 
+		var mainStore = $scope.store; // From MainCtrl.
+		var selectedListName = appPaths.getListName($routeParams);
+		var store = mainStore.lists[selectedListName];
+		if (!store) {
+			$location.path(appPaths.defaultListPath());
+			return;
+		}
 		var todos = $scope.todos = store.todos;
 
 		$scope.newTodo = '';
@@ -20,13 +27,24 @@ angular.module('todomvc')
 			$scope.allChecked = !$scope.remainingCount;
 		}, true);
 
-		// Monitor the current route for changes and adjust the filter accordingly.
-		$scope.$on('$routeChangeSuccess', function () {
+		var updateStatusFilter = function () {
+			var listName = appPaths.getListName($routeParams);
 			var status = $scope.status = $routeParams.status || '';
+
 			$scope.statusFilter = (status === 'active') ?
 				{ completed: false } : (status === 'completed') ?
 				{ completed: true } : {};
-		});
+
+			$scope.allItemsHref = appPaths.hrefFromPath(appPaths.listPath(listName));
+			$scope.onlyActiveItemsHref = appPaths.hrefFromPath(appPaths.listPath(listName, 'active'));
+			$scope.onlyCompletedItemsHref = appPaths.hrefFromPath(appPaths.listPath(listName, 'completed'));
+		};
+
+		// Monitor the current route for changes and adjust the filter accordingly.
+		$scope.$on('$routeChangeSuccess', updateStatusFilter);
+
+		// Also filter correctly when landing URL contains status filter.
+		updateStatusFilter();
 
 		$scope.addTodo = function () {
 			var newTodo = {
