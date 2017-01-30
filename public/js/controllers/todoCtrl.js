@@ -17,6 +17,7 @@ angular.module('todomvc')
 			return;
 		}
 		var todos = $scope.todos = store.todos;
+		store.get(); // Async-launch request.
 
 		$scope.newTodo = '';
 		$scope.editedTodo = null;
@@ -134,7 +135,7 @@ angular.module('todomvc')
 		};
 
 		$scope.markAll = function (completed) {
-			todos.forEach(function (todo) {
+			todos.forEach(function (todo) { // TODO: should batch into single call to backend
 				if (todo.completed !== completed) {
 					$scope.toggleCompleted(todo, completed);
 				}

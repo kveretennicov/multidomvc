@@ -8,84 +8,159 @@
  * model.
  */
 angular.module('todomvc')
-	.factory('todoStorage', function ($http, $injector) {
+
+	.value('apiInitArgs', {
+		listCollectionAddress: null,
+		lists: []
+	})
+
+	.factory('todoStorage', function ($http, $injector, apiInitArgs) {
 		'use strict';
 
 		// Detect if an API backend is present. If so, return the API module, else
 		// hand off the localStorage adapter
 		return $http.get('/api')
-			.then(function () {
-				return $injector.get('apiBackedTodoStorage');
+			.then(function (response) {
+
+				var listCollectionAddress = response.data['lists'];
+
+				var newListStore = function (listName, listAddress) {
+
+					var store = {
+						name: listName,
+						_address: listAddress,
+						todos: [],
+
+						_updateTodos: function (modifyStoreTodos) {
+							var originalTodos = store.todos.slice(0);
+							modifyStoreTodos();
+							return $http.patch(listAddress, {
+								'todos': store.todos
+								})
+								.then(function success() {
+									return store.todos;
+								}, function error() {
+									angular.copy(originalTodos, store.todos);
+								});
+						},
+
+						clearCompleted: function () {
+							return store._updateTodos(function () {
+								var incompleteTodos = store.todos.filter(function (todo) {
+									return !todo.completed;
+								});
+								angular.copy(incompleteTodos, store.todos);
+							});
+						},
+
+						delete: function (todo) {
+							return store._updateTodos(function () {
+								store.todos.splice(store.todos.indexOf(todo), 1);
+							});
+						},
+
+						get: function () {
+							return $http.get(listAddress)
+								.then(function success(response) {
+									angular.copy(response.data.todos, store.todos);
+									return store.todos;
+								});
+						},
+
+						insert: function (todo) {
+							return store._updateTodos(function () {
+								store.todos.splice(0, 0, todo);
+							});
+						},
+
+						put: function (todo, index) {
+							return store._updateTodos(function () {
+								store.todos[index] = todo;
+							});
+						}
+					};
+
+					return store;
+				};
+				apiInitArgs.listCollectionAddress = listCollectionAddress;
+				apiInitArgs.newListStore = newListStore;
+				return $http.get(listCollectionAddress)
+					.then(function (response) {
+						angular.forEach(response.data, function (listInfo) {
+							var subStore = newListStore(listInfo.name, listInfo.url);
+							apiInitArgs.lists.push(subStore);
+						});
+						return $injector.get('apiBackedTodoStorage');
+					});
 			}, function () {
 				return $injector.get('clientBackedTodoStorage');
 			});
 	})
 
-	.factory('apiBackedTodoStorage', function ($resource) {
+	.factory('apiBackedTodoStorage', function ($q, $http, apiInitArgs) {
 		'use strict';
 
-		// TODO: update to support multiple lists
-		var store = {
-			todos: [],
+		var mainStore = {
+			lists: {}, // Map of list-name->list-store.
 
-			api: $resource('/api/todos/:id', null,
-				{
-					update: { method:'PUT' }
+			delete: function (list) {
+				var deferred = $q.defer();
+
+				var listName = list.name;
+				if (listName === 'default') {
+					deferred.reject('default list must not be deleted');
 				}
-			),
+				else {
+					var subStore = mainStore.lists[listName];
+					if (subStore) {
+						return $http.delete(subStore._address)
+							.then(function success() {
+								delete mainStore.lists[listName];
+								return mainStore.lists;
+							});
+					}
+					deferred.resolve(mainStore.lists);
+				}
 
-			clearCompleted: function () {
-				var originalTodos = store.todos.slice(0);
-
-				var incompleteTodos = store.todos.filter(function (todo) {
-					return !todo.completed;
-				});
-
-				angular.copy(incompleteTodos, store.todos);
-
-				return store.api.delete(function () {
-					}, function error() {
-						angular.copy(originalTodos, store.todos);
-					});
-			},
-
-			delete: function (todo) {
-				var originalTodos = store.todos.slice(0);
-
-				store.todos.splice(store.todos.indexOf(todo), 1);
-				return store.api.delete({ id: todo.id },
-					function () {
-					}, function error() {
-						angular.copy(originalTodos, store.todos);
-					});
+				return deferred.promise;
 			},
 
 			get: function () {
-				return store.api.query(function (resp) {
-					angular.copy(resp, store.todos);
+				// TODO: handle better if this is called second time (so lists is not empty)
+				var deferred = $q.defer();
+				angular.forEach(apiInitArgs.lists, function (listStore) {
+					mainStore.lists[listStore.name] = listStore;
 				});
+				deferred.resolve(mainStore.lists);
+				return deferred.promise;
 			},
 
-			insert: function (todo) {
-				var originalTodos = store.todos.slice(0);
-
-				return store.api.save(todo,
-					function success(resp) {
-						todo.id = resp.id;
-						store.todos.push(todo);
-					}, function error() {
-						angular.copy(originalTodos, store.todos);
-					})
-					.$promise;
-			},
-
-			put: function (todo) {
-				return store.api.update({ id: todo.id }, todo)
-					.$promise;
+			insert: function (list) {
+				var deferred = $q.defer();
+				var listName = list.name.trim();
+				if (!listName) {
+					deferred.reject('list name must not be blank or empty');
+				}
+				else if (listName in mainStore.lists) {
+					deferred.reject('list "' + listName + '" already exists');
+				}
+				else {
+					return $http.post(apiInitArgs.listCollectionAddress,
+									  {name: listName, todos: []})
+						.then(function success(response) {
+							var listAddress = response.data.url;
+							var subStore = mainStore.lists[listName]
+										 = apiInitArgs.newListStore(listName, listAddress);
+							return mainStore.lists;
+						}, function error() {
+							delete mainStore[listName];
+						});
+				}
+				return deferred.promise;
 			}
 		};
 
-		return store;
+		return mainStore;
 	})
 
 	// Make localStorage injectable, for testability.
