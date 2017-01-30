@@ -36,8 +36,10 @@
 				        ng-change="onSelectionChanged()">
 				</select>
 				<ul id="todolist-buttons">
-					<li><a ng-href="{{newListHref}}" title="Create new To Do list">Create new list</a></li>
-					<li><a ng-click="deleteCurrentList()" title="Delete current To Do list"
+					<li><a id="new-list-button"
+					       ng-href="{{newListHref}}" title="Create new To Do list">Create new list</a></li>
+					<li><a id="delete-list-button"
+					       ng-click="deleteCurrentList()" title="Delete current To Do list"
 					       ng-show="canDeleteCurrentList()">Delete this list</a></li>
 				</ul>
 			</section>
