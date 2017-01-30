@@ -1,0 +1,9 @@
+[
+  {
+    "model": "backend.todolist",
+    "pk": 1,
+    "fields": {
+      "name": "default"
+    }
+  }
+]
