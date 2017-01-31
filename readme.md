@@ -4,7 +4,7 @@ Based on [AngularJS TodoMVC](https://github.com/tastejs/todomvc/tree/master/exam
 
 It extends the original example with the following:
 - It allows managing multiple TODO lists instead of just one.
-- It adds admin forms (Django).
+- It adds admin forms (Django + Grappelli).
 - It adds API backend (Django REST Framework).
 
 ## Testsuite

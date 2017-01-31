@@ -23,5 +23,6 @@ router.register(r'lists', views.ToDoListViewSet)
 
 urlpatterns = [
     url(r'^api/', include(router.urls)),
+    url(r'^grappelli/', include('grappelli.urls')),
     url(r'^admin/', admin.site.urls),
 ]
