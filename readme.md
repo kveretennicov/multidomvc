@@ -6,6 +6,7 @@ It extends the original example with the following:
 - It allows managing multiple TODO lists instead of just one.
 - It adds admin forms (Django + Grappelli).
 - It adds API backend (Django REST Framework).
+- It versions data changes on the backend (Reversion).
 
 ## Testsuite
 
