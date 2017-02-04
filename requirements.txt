@@ -1,0 +1,4 @@
+Django==1.10.2
+django-grappelli==2.8.2
+django-reversion==2.0.6
+djangorestframework==3.4.7
